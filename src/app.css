@@ -1,0 +1,1036 @@
+/* ============================================================
+   ОСІННЯ ПРИВІТАЛЬНА РОЗГОРТКА — дизайн-система
+   Палітра: тепле золото / вохра / іржа / темний горіх
+   ============================================================ */
+
+/* ---------- 1. Токени теми ---------- */
+:root{
+  /* Денна (жовто-світла) тема */
+  --bg-0:#fbf1de;
+  --bg-1:#f4e3c4;
+  --bg-2:#ecd5ac;
+  --bg-deep:#e2c391;
+  --paper:#fffaf0;
+  --paper-2:#fdf3e2;
+  --ink:#2c1c0e;
+  --ink-soft:#6d543c;
+  --ink-faint:#9b8266;
+
+  --gold:#e9b13f;
+  --gold-lt:#f6d484;
+  --gold-pale:#fbe9bf;
+  --amber:#d98925;
+  --rust:#b8531d;
+  --rust-deep:#8d3a12;
+  --olive:#8a7a34;
+  --bark:#553a22;
+  --bark-deep:#3a2614;
+
+  --line:rgba(85,58,34,.16);
+  --line-strong:rgba(85,58,34,.32);
+  --shade-1:rgba(74,45,16,.10);
+  --shade-2:rgba(74,45,16,.18);
+  --shade-3:rgba(74,45,16,.30);
+  --glow:rgba(249,203,110,.55);
+  --halo:rgba(255,226,163,.85);
+
+  /* 3D-кнопка */
+  --btn-face:#f6d484;
+  --btn-face-2:#eab545;
+  --btn-edge:#b9761d;
+  --btn-edge-2:#8d520f;
+  --btn-ink:#3a2410;
+  --btn-ghost-face:rgba(255,250,240,.72);
+  --btn-ghost-edge:#c9a675;
+
+  --ring-1:#e9b13f;
+  --ring-2:#b8531d;
+  --ring-3:#8a7a34;
+
+  --sheen:rgba(255,255,255,.75);
+  --grain:.055;
+  --leaf-op:.85;
+
+  --ease:cubic-bezier(.22,.72,.24,1);
+  --ease-spring:cubic-bezier(.34,1.42,.5,1);
+  --dur:.55s;
+}
+
+/* Вечірня (темна) тема — ті самі осінні тони, але приглушені */
+:root[data-theme="dusk"]{
+  --bg-0:#150e08;
+  --bg-1:#1e150c;
+  --bg-2:#271b10;
+  --bg-deep:#2f2114;
+  --paper:#241a11;
+  --paper-2:#2c2016;
+  --ink:#f6e6c9;
+  --ink-soft:#d0b489;
+  --ink-faint:#9a8261;
+
+  --gold:#f3c15c;
+  --gold-lt:#ffdd93;
+  --gold-pale:#5a441f;
+  --amber:#e8993a;
+  --rust:#d4682a;
+  --rust-deep:#a44a1a;
+  --olive:#b09a44;
+  --bark:#c9a678;
+  --bark-deep:#e5cca4;
+
+  --line:rgba(246,230,201,.14);
+  --line-strong:rgba(246,230,201,.28);
+  --shade-1:rgba(0,0,0,.35);
+  --shade-2:rgba(0,0,0,.5);
+  --shade-3:rgba(0,0,0,.66);
+  --glow:rgba(243,193,92,.30);
+  --halo:rgba(255,206,120,.35);
+
+  --btn-face:#8a5c1c;
+  --btn-face-2:#6d4512;
+  --btn-edge:#3f2708;
+  --btn-edge-2:#291805;
+  --btn-ink:#ffeecb;
+  --btn-ghost-face:rgba(64,46,27,.6);
+  --btn-ghost-edge:#5a4223;
+
+  --sheen:rgba(255,226,170,.28);
+  --grain:.09;
+  --leaf-op:.7;
+}
+
+/* ---------- 2. База ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  min-height:100%;
+  font-family:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ink);
+  background:var(--bg-1);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  transition:background .8s var(--ease),color .8s var(--ease);
+}
+img{max-width:100%;display:block}
+svg{fill:currentColor}          /* <use> з власним fill= перекриває це правило */
+button{font:inherit;color:inherit}
+::selection{background:var(--gold);color:var(--bark-deep)}
+
+:focus-visible{
+  outline:2px solid var(--rust);
+  outline-offset:3px;
+  border-radius:4px;
+}
+
+/* ---------- 3. Сцена й атмосфера ---------- */
+/* нерухомий шар атмосфери — не впливає на висоту сторінки */
+.backdrop{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 78% -10%, var(--halo) 0%, transparent 58%),
+    radial-gradient(90% 70% at 8% 105%, var(--bg-deep) 0%, transparent 60%),
+    linear-gradient(168deg, var(--bg-0) 0%, var(--bg-1) 48%, var(--bg-2) 100%);
+  transition:background .8s var(--ease);
+}
+/* сцена — те, що читають */
+.stage{
+  position:relative;
+  z-index:5;
+  min-height:100vh;
+  min-height:100svh;
+  display:grid;
+  place-items:center;
+  padding:clamp(14px,3.2vw,52px);
+}
+/* колода: обкладинка й розгортка стоять в одній комірці */
+.deck{
+  position:relative;
+  width:100%;
+  max-width:1120px;
+  display:grid;
+  perspective:1700px;
+  perspective-origin:50% 42%;
+  /* без preserve-3d: інакше Chromium віддає всі кліки контейнеру */
+}
+.deck > *{grid-area:1 / 1;justify-self:center;align-self:center;width:100%}
+
+/* сонячний промінь, що дихає */
+.sunbeam{
+  position:absolute;
+  top:-30vh;right:-10vw;
+  width:70vw;height:120vh;
+  background:linear-gradient(200deg,var(--glow),transparent 62%);
+  filter:blur(60px);
+  opacity:.75;
+  pointer-events:none;
+  z-index:0;
+  animation:beam 14s var(--ease) infinite alternate;
+}
+.sunbeam.b2{
+  top:auto;bottom:-40vh;left:-20vw;right:auto;
+  width:60vw;height:90vh;
+  background:linear-gradient(20deg,var(--glow),transparent 60%);
+  opacity:.45;
+  animation-duration:19s;
+  animation-delay:-6s;
+}
+
+/* полотно з листям */
+#leafCanvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  z-index:2;
+  pointer-events:none;
+}
+
+/* віньєтка + зерно паперу */
+.vignette{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 45%,transparent 52%,var(--shade-2) 100%);
+  mix-blend-mode:multiply;
+}
+:root[data-theme="dusk"] .vignette{mix-blend-mode:normal;opacity:.9}
+.grain{
+  position:absolute;inset:0;z-index:4;pointer-events:none;
+  opacity:var(--grain);
+  background-image:radial-gradient(rgba(60,35,10,.9) .6px,transparent .7px);
+  background-size:3px 3px;
+}
+
+/* ---------- 4. Декоративні гілки (SVG) ---------- */
+.branch{
+  position:absolute;
+  z-index:1;
+  pointer-events:none;
+  opacity:var(--leaf-op);
+  will-change:transform;
+}
+.branch svg{display:block;width:100%;height:auto;overflow:visible}
+.branch--tl{top:-3vw;left:-3vw;width:clamp(200px,29vw,460px);transform-origin:top left}
+.branch--br{bottom:-4vw;right:-3vw;width:clamp(220px,32vw,520px);transform-origin:bottom right}
+.branch--bl{bottom:-2vw;left:-4vw;width:clamp(160px,20vw,320px);transform-origin:bottom left}
+
+.twig{
+  fill:none;
+  stroke:var(--bark);
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:var(--len,600);
+  stroke-dashoffset:var(--len,600);
+  animation:draw 2.4s var(--delay,0s) var(--ease) forwards;
+}
+.twig.thin{stroke-width:1.3;opacity:.8}
+.foliage{
+  transform:scale(0) rotate(var(--r,0deg));
+  transform-box:fill-box;
+  transform-origin:var(--ox,50%) var(--oy,90%);
+  opacity:0;
+  animation:pop .95s var(--delay,0s) var(--ease-spring) forwards;
+}
+.breeze{
+  transform-box:fill-box;
+  transform-origin:var(--bo,50%) 95%;
+  animation:breeze var(--bd,7s) ease-in-out infinite;
+  animation-delay:var(--bdel,0s);
+}
+
+/* ---------- 5. Обкладинка (конверт) ---------- */
+.spread-wrap{
+  /* доки лист закритий — поза потоком, щоб обкладинка була по центру екрана */
+  position:absolute;
+  top:0;left:0;right:0;
+  z-index:7;
+  will-change:transform;
+}
+body.is-open .spread-wrap{position:relative}
+.cover{
+  position:relative;
+  z-index:8;
+  width:min(560px,100%);
+  justify-self:center;
+  transform-style:preserve-3d;
+  transition:transform 1.1s var(--ease),opacity .8s var(--ease);
+}
+.cover__card{
+  position:relative;
+  padding:clamp(34px,6vw,62px) clamp(26px,5.4vw,58px) clamp(30px,5vw,52px);
+  text-align:center;
+  border-radius:3px;
+  background:
+    linear-gradient(180deg,var(--paper) 0%,var(--paper-2) 100%);
+  border:1px solid var(--line);
+  box-shadow:
+    0 1px 0 var(--sheen) inset,
+    0 26px 50px -28px var(--shade-3),
+    0 6px 18px -12px var(--shade-2);
+  transform-style:preserve-3d;
+  animation:cover-in 1.2s .1s var(--ease-spring) both;
+}
+.cover__card::before{
+  content:"";
+  position:absolute;inset:9px;
+  border:1px solid var(--line);
+  pointer-events:none;
+}
+.cover__seal{
+  width:74px;height:74px;
+  margin:0 auto 22px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  color:#fff6e2;
+  background:radial-gradient(circle at 34% 30%,var(--rust) 0%,var(--rust-deep) 70%);
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.28) inset,
+    0 -3px 8px rgba(0,0,0,.28) inset,
+    0 14px 26px -14px var(--shade-3);
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;
+  line-height:1;
+  transform:translateZ(24px);
+  animation:seal-in 1.1s .35s var(--ease-spring) both,seal-pulse 4.6s 2s ease-in-out infinite;
+}
+.cover__eyebrow{
+  font-size:10.5px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:var(--rust);
+  font-weight:600;
+  animation:rise .9s .5s var(--ease) both;
+}
+.cover__title{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:500;
+  font-size:clamp(42px,8.4vw,78px);
+  line-height:1.02;
+  margin:16px 0 0;
+  letter-spacing:-.015em;
+  animation:rise 1s .62s var(--ease) both;
+}
+.cover__title em{font-style:italic;color:var(--rust)}
+.cover__sub{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(17px,2.3vw,21px);
+  line-height:1.5;
+  color:var(--ink-soft);
+  max-width:34ch;
+  margin:16px auto 30px;
+  animation:rise 1s .78s var(--ease) both;
+}
+.cover__hint{
+  margin-top:20px;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  animation:rise 1s 1.15s var(--ease) both;
+}
+.is-open .cover{
+  transform:rotateX(-96deg) translateY(-14%) scale(.94);
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ---------- 6. Розгортка ---------- */
+.spread{
+  position:relative;
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
+  border-radius:4px;
+  background:linear-gradient(180deg,var(--paper) 0%,var(--paper-2) 100%);
+  border:1px solid var(--line);
+  box-shadow:
+    0 1px 0 var(--sheen) inset,
+    0 40px 80px -46px var(--shade-3),
+    0 12px 30px -22px var(--shade-2);
+  transform:translateY(26px) scale(.965);
+  opacity:0;
+  visibility:hidden;
+  transition:transform 1s .18s var(--ease),opacity .9s .18s var(--ease),visibility 0s .18s;
+  overflow:hidden;
+}
+.is-open .spread{
+  transform:translateY(0) scale(1);
+  opacity:1;
+  visibility:visible;
+  transition-delay:.34s;
+}
+.spread::after{ /* тепла кромка паперу */
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.28);
+  mix-blend-mode:overlay;
+}
+/* корінець розгортки */
+.spine{
+  position:absolute;
+  top:0;bottom:0;
+  left:calc(43% - 1px);
+  width:2px;
+  z-index:3;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent,var(--line-strong) 14%,var(--line-strong) 86%,transparent);
+}
+.spine::before,.spine::after{
+  content:"";
+  position:absolute;top:0;bottom:0;width:26px;
+}
+.spine::before{right:100%;background:linear-gradient(90deg,transparent,var(--shade-1))}
+.spine::after{left:100%;background:linear-gradient(90deg,var(--shade-1),transparent)}
+
+.panel{
+  position:relative;
+  padding:clamp(24px,3.4vw,46px);
+  min-width:0;
+}
+.panel--left{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:20px;
+  background:
+    radial-gradient(90% 60% at 20% 0%,var(--gold-pale) 0%,transparent 62%);
+}
+:root[data-theme="dusk"] .panel--left{
+  background:radial-gradient(90% 60% at 20% 0%,rgba(243,193,92,.10) 0%,transparent 62%);
+}
+.panel--right{
+  padding-left:clamp(26px,3.6vw,52px);
+  display:flex;
+  flex-direction:column;
+}
+
+/* ---------- 7. Портрет ---------- */
+.portrait{
+  position:relative;
+  width:min(100%,282px);
+  aspect-ratio:1;
+  margin:4px auto 6px;
+  perspective:900px;
+  --p-delay:.55s;
+}
+.portrait__tilt{
+  position:relative;
+  width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:transform .5s var(--ease);
+  will-change:transform;
+}
+.portrait__orbit,
+.portrait__ring,
+.portrait__dashed{
+  position:absolute;inset:-9%;
+  border-radius:50%;
+  pointer-events:none;
+}
+.portrait__ring{
+  background:conic-gradient(from 210deg,
+    var(--ring-1) 0deg,var(--gold-lt) 62deg,var(--ring-2) 148deg,
+    var(--ring-3) 232deg,var(--amber) 300deg,var(--ring-1) 360deg);
+  opacity:0;
+  filter:blur(.4px);
+  transform:translateZ(-18px);
+  /* closest-side: інакше 100% береться від діагоналі і кільце ховається під фото */
+  -webkit-mask:radial-gradient(circle closest-side,transparent calc(100% - 7px),#000 calc(100% - 7px),#000 calc(100% - 1.5px),transparent calc(100% - 1.5px));
+          mask:radial-gradient(circle closest-side,transparent calc(100% - 7px),#000 calc(100% - 7px),#000 calc(100% - 1.5px),transparent calc(100% - 1.5px));
+  animation:fade-in 1.3s var(--p-delay) var(--ease) forwards,spin 26s linear infinite;
+}
+.portrait__dashed{
+  inset:-19%;
+  border:1px dashed var(--line-strong);
+  opacity:0;
+  transform:translateZ(-30px);
+  animation:fade-in 1.4s calc(var(--p-delay) + .18s) var(--ease) forwards,spin 74s linear infinite reverse;
+}
+.portrait__glow{
+  position:absolute;inset:-26%;
+  border-radius:50%;
+  background:radial-gradient(circle,var(--glow) 0%,transparent 64%);
+  filter:blur(14px);
+  opacity:0;
+  transform:translateZ(-46px);
+  animation:glow-in 1.6s calc(var(--p-delay) + .1s) var(--ease) forwards,glow-breathe 7s 2s ease-in-out infinite;
+}
+.portrait__frame{
+  position:absolute;inset:0;
+  border-radius:50%;
+  overflow:hidden;
+  background:var(--bg-2);
+  transform:translateZ(34px) scale(.35) rotate(-14deg);
+  opacity:0;
+  box-shadow:
+    0 0 0 5px var(--paper),
+    0 0 0 6px var(--line-strong),
+    0 26px 46px -20px var(--shade-3);
+  animation:portrait-in 1.25s var(--p-delay) var(--ease-spring) forwards;
+}
+.portrait__frame img{
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:50% 20%;
+  filter:saturate(1.06) contrast(1.03) sepia(.1);
+  transform:scale(1.06);
+  animation:ken-burns 22s 1.8s ease-in-out infinite alternate;
+}
+/* тепле осіннє скло поверх фото */
+.portrait__frame::after{
+  content:"";
+  position:absolute;inset:0;
+  border-radius:50%;
+  background:linear-gradient(200deg,rgba(255,208,120,.22),transparent 46%,rgba(140,60,15,.14));
+  pointer-events:none;
+}
+/* полиск, що пробігає по фото */
+.portrait__sheen{
+  position:absolute;inset:0;
+  border-radius:50%;
+  overflow:hidden;
+  pointer-events:none;
+  transform:translateZ(36px);
+}
+.portrait__sheen::before{
+  content:"";
+  position:absolute;
+  top:-60%;left:-120%;
+  width:70%;height:220%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+  transform:rotate(18deg);
+  animation:sheen 6.5s 2.6s ease-in-out infinite;
+}
+/* листочки на орбіті навколо фото */
+.portrait__orbit{
+  inset:-17%;
+  opacity:0;
+  transition:opacity .9s var(--ease);
+  animation:spin var(--od,34s) linear infinite;
+  animation-direction:var(--odir,normal);
+}
+.portrait__orbit.o2{inset:-27%;--od:52s;--odir:reverse}
+.portrait__orbit.is-in{opacity:1}
+.orbit-leaf{
+  position:absolute;
+  width:28px;height:28px;
+  margin:-14px 0 0 -14px;
+  color:var(--rust);
+  filter:drop-shadow(0 3px 5px var(--shade-2));
+}
+.orbit-leaf svg{width:100%;height:100%;display:block;animation:leaf-tumble 5s ease-in-out infinite}
+.orbit-leaf.l2{color:var(--gold);width:23px;height:23px;margin:-11.5px 0 0 -11.5px}
+.orbit-leaf.l3{color:var(--olive);width:19px;height:19px;margin:-9.5px 0 0 -9.5px}
+.orbit-leaf.l4{color:var(--amber);width:25px;height:25px;margin:-12.5px 0 0 -12.5px}
+.portrait__spark{
+  position:absolute;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--gold);
+  opacity:0;
+  transform:translateZ(48px);
+  box-shadow:0 0 10px var(--glow);
+  animation:spark-in .9s var(--sd,1.4s) var(--ease-spring) forwards,twinkle 3.6s calc(var(--sd,1.4s) + .9s) ease-in-out infinite;
+}
+.portrait__spark.s1{top:2%;left:16%;--sd:1.35s}
+.portrait__spark.s2{top:20%;right:-2%;--sd:1.5s;width:5px;height:5px;background:var(--rust)}
+.portrait__spark.s3{bottom:12%;left:-3%;--sd:1.65s;width:6px;height:6px;background:var(--amber)}
+.portrait__spark.s4{bottom:-1%;right:22%;--sd:1.8s;width:5px;height:5px;background:var(--olive)}
+
+/* ---------- 8. Ліва панель: підписи ---------- */
+.mark{
+  display:flex;align-items:center;gap:12px;
+  font-size:10.5px;letter-spacing:.4em;text-transform:uppercase;
+  font-weight:600;color:var(--rust);
+  animation:rise .9s .8s var(--ease) both;
+}
+.mark .dash{height:1px;width:34px;background:currentColor;opacity:.6}
+.panel-title{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:500;
+  font-size:clamp(34px,4.4vw,52px);
+  line-height:1.04;
+  margin:0;
+  letter-spacing:-.01em;
+  animation:rise 1s .9s var(--ease) both;
+}
+.panel-title em{font-style:italic;color:var(--rust)}
+.panel-note{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(16px,1.7vw,19px);
+  line-height:1.5;
+  color:var(--ink-soft);
+  margin:0;
+  max-width:30ch;
+  animation:rise 1s 1s var(--ease) both;
+}
+.leaf-rule{
+  display:flex;align-items:center;gap:10px;width:100%;
+  color:var(--gold);
+  animation:rise 1s 1.05s var(--ease) both;
+}
+.leaf-rule i{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line-strong),transparent)}
+.leaf-rule svg{width:18px;height:18px;flex:none}
+.facts{
+  display:grid;
+  gap:10px;
+  width:100%;
+  margin-top:auto;
+  padding-top:14px;
+  animation:rise 1s 1.15s var(--ease) both;
+}
+.fact{
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);
+  border-top:1px solid var(--line);
+  padding-top:9px;
+}
+.fact b{
+  font-weight:600;
+  letter-spacing:.06em;
+  color:var(--ink-soft);
+  text-transform:none;
+  font-size:12.5px;
+}
+
+/* ---------- 9. Глави ---------- */
+.reader{
+  position:relative;
+  flex:1;
+  min-height:clamp(360px,48vh,470px);
+  perspective:1400px;
+}
+.chapter{
+  position:absolute;inset:0;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:rotateY(16deg) translateZ(-90px) translateX(26px);
+  transition:opacity .5s var(--ease),transform .62s var(--ease),visibility 0s .62s;
+}
+.chapter.is-active{
+  position:relative;
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:none;
+  transition:opacity .55s .1s var(--ease),transform .7s .06s var(--ease),visibility 0s;
+}
+.chapter.is-prev{transform:rotateY(-16deg) translateZ(-90px) translateX(-26px)}
+
+.chapter__head{display:flex;align-items:baseline;gap:14px;margin-bottom:14px}
+.chapter__num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(30px,3.6vw,44px);
+  line-height:1;
+  color:var(--gold);
+  font-style:italic;
+}
+.chapter__kicker{
+  font-size:10px;letter-spacing:.38em;text-transform:uppercase;
+  font-weight:600;color:var(--ink-faint);
+}
+.chapter h2{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:500;
+  font-size:clamp(27px,3.5vw,44px);
+  line-height:1.08;
+  margin:0 0 18px;
+  letter-spacing:-.012em;
+  text-wrap:balance;
+}
+.chapter h2 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:.1em .02em .16em;margin:-.1em -.02em -.16em}
+.chapter h2 .w > span{display:inline-block;transform:translateY(115%)}
+.chapter.is-active h2 .w > span{animation:rise-word .95s var(--ease) forwards;animation-delay:var(--wd,0s)}
+.chapter h2 em{font-style:italic;color:var(--rust)}
+
+.chapter__body{font-size:clamp(14.5px,1.15vw,16px);line-height:1.78;color:var(--ink-soft);max-width:60ch}
+.chapter__body p{margin:0 0 13px;opacity:0;transform:translateY(12px)}
+.chapter.is-active .chapter__body p{animation:rise .85s var(--ease) forwards;animation-delay:var(--pd,.3s)}
+.chapter__body strong{
+  font-weight:600;
+  color:var(--ink);
+  background:linear-gradient(transparent 62%,var(--gold-lt) 62%,var(--gold-lt) 94%,transparent 94%);
+  padding:0 2px;
+}
+:root[data-theme="dusk"] .chapter__body strong{
+  background:linear-gradient(transparent 62%,rgba(243,193,92,.30) 62%,rgba(243,193,92,.30) 94%,transparent 94%);
+}
+.quote{
+  margin:16px 0 0;
+  padding:14px 0 0 18px;
+  border-left:2px solid var(--gold);
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(17px,1.9vw,21px);
+  line-height:1.45;
+  color:var(--ink);
+  opacity:0;
+  transform:translateY(12px);
+}
+.chapter.is-active .quote{animation:rise .9s .8s var(--ease) forwards}
+.sign{
+  margin-top:20px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  opacity:0;
+  transform:translateY(12px);
+}
+.chapter.is-active .sign{animation:rise .9s .95s var(--ease) forwards}
+.sign__from{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(24px,3.2vw,38px);
+  line-height:1;
+}
+.sign__from .heart{display:inline-block;color:var(--rust);animation:heartbeat 2.1s .6s ease-out infinite}
+.sign__meta{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* ---------- 10. Керування + 3D-кнопки ---------- */
+.controls{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.controls__spacer{flex:1;min-width:6px}
+
+.btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:0;
+  border:0;
+  background:none;
+  cursor:pointer;
+  perspective:640px;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn__face{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:12px 22px;
+  border-radius:999px;
+  font-size:12.5px;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--btn-ink);
+  background:linear-gradient(180deg,var(--btn-face) 0%,var(--btn-face-2) 100%);
+  transform-style:preserve-3d;
+  transform:
+    rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))
+    translateY(var(--ty,0px)) translateZ(0);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.5) inset,
+    0 -2px 6px rgba(0,0,0,.18) inset,
+    0 2px 0 var(--btn-edge),
+    0 4px 0 var(--btn-edge),
+    0 6px 0 var(--btn-edge-2),
+    0 8px 0 var(--btn-edge-2),
+    0 14px 22px -10px var(--shade-3);
+  transition:
+    transform .22s var(--ease),
+    box-shadow .22s var(--ease),
+    background .3s var(--ease);
+  will-change:transform;
+}
+.btn__face svg{width:15px;height:15px;flex:none}
+.btn:hover .btn__face,
+.btn:focus-visible .btn__face{
+  --ty:-2px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.55) inset,
+    0 -2px 6px rgba(0,0,0,.18) inset,
+    0 2px 0 var(--btn-edge),
+    0 4px 0 var(--btn-edge),
+    0 6px 0 var(--btn-edge-2),
+    0 9px 0 var(--btn-edge-2),
+    0 11px 0 var(--btn-edge-2),
+    0 22px 30px -12px var(--shade-3);
+}
+.btn:active .btn__face,
+.btn.is-pressed .btn__face{
+  --ty:6px;
+  --rx:0deg;--ry:0deg;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.4) inset,
+    0 -1px 4px rgba(0,0,0,.22) inset,
+    0 1px 0 var(--btn-edge),
+    0 2px 0 var(--btn-edge-2),
+    0 6px 12px -8px var(--shade-3);
+  transition-duration:.08s;
+}
+/* блиск, що пробігає гранню кнопки */
+.btn__face::after{
+  content:"";
+  position:absolute;inset:0;
+  border-radius:inherit;
+  overflow:hidden;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.5) 46%,transparent 62%);
+  background-size:250% 100%;
+  background-position:130% 0;
+  opacity:0;
+  transition:opacity .25s var(--ease);
+  pointer-events:none;
+}
+.btn:hover .btn__face::after{opacity:1;animation:btn-shine 1.05s var(--ease)}
+
+.btn--ghost .btn__face{
+  color:var(--ink);
+  background:linear-gradient(180deg,var(--btn-ghost-face),transparent);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.45) inset,
+    0 0 0 1px var(--btn-ghost-edge),
+    0 3px 0 -1px var(--btn-ghost-edge),
+    0 5px 0 -2px var(--btn-ghost-edge),
+    0 12px 18px -12px var(--shade-2);
+}
+.btn--ghost:hover .btn__face{
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.5) inset,
+    0 0 0 1px var(--btn-ghost-edge),
+    0 4px 0 -1px var(--btn-ghost-edge),
+    0 7px 0 -2px var(--btn-ghost-edge),
+    0 20px 26px -14px var(--shade-2);
+}
+.btn--ghost:active .btn__face{
+  box-shadow:
+    0 0 0 1px var(--btn-ghost-edge),
+    0 1px 0 -1px var(--btn-ghost-edge),
+    0 5px 10px -8px var(--shade-2);
+}
+.btn--icon .btn__face{padding:12px;border-radius:50%}
+.btn[disabled]{cursor:default;opacity:.42;filter:saturate(.5)}
+.btn[disabled] .btn__face{--ty:0px !important;--rx:0deg !important;--ry:0deg !important}
+.btn--lg .btn__face{padding:15px 32px;font-size:13px;letter-spacing:.13em}
+
+/* пульсуючий ореол головної кнопки */
+.btn--pulse::before{
+  content:"";
+  position:absolute;inset:-6px;
+  border-radius:999px;
+  border:1px solid var(--gold);
+  opacity:0;
+  animation:halo 2.8s 1.4s ease-out infinite;
+  pointer-events:none;
+}
+
+/* ---------- 11. Прогрес ---------- */
+.progress{display:flex;align-items:center;gap:8px}
+.dot{
+  width:9px;height:9px;
+  padding:0;border:0;border-radius:50%;
+  background:var(--line-strong);
+  cursor:pointer;
+  transition:transform .3s var(--ease-spring),background .3s var(--ease),box-shadow .3s var(--ease);
+}
+.dot:hover{transform:scale(1.35)}
+.dot.is-on{
+  background:var(--gold);
+  transform:scale(1.28);
+  box-shadow:0 0 0 3px var(--glow);
+}
+.progress__label{
+  font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-faint);margin-left:6px;
+  font-variant-numeric:tabular-nums;
+}
+.progress__bar{
+  position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:var(--line);
+  overflow:hidden;
+}
+.progress__bar i{
+  display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--gold),var(--rust));
+  transition:width .6s var(--ease);
+}
+
+/* ---------- 12. Плаваюча панель (тема + звук) ---------- */
+.utility{
+  position:fixed;
+  top:clamp(12px,2vw,22px);
+  right:clamp(12px,2vw,22px);
+  z-index:20;
+  display:flex;
+  gap:9px;
+}
+.utility .btn__face{
+  padding:10px;
+  border-radius:50%;
+  background:linear-gradient(180deg,var(--paper) 0%,var(--paper-2) 100%);
+  -webkit-backdrop-filter:blur(10px) saturate(1.2);
+          backdrop-filter:blur(10px) saturate(1.2);
+}
+.utility .btn__face svg{width:16px;height:16px}
+
+/* ---------- 13. Тост + серця ---------- */
+.toast{
+  position:fixed;
+  left:50%;bottom:26px;
+  z-index:30;
+  transform:translate(-50%,26px);
+  opacity:0;
+  pointer-events:none;
+  padding:11px 20px;
+  border-radius:999px;
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  color:var(--btn-ink);
+  background:linear-gradient(180deg,var(--btn-face),var(--btn-face-2));
+  box-shadow:0 6px 0 -2px var(--btn-edge-2),0 18px 30px -14px var(--shade-3);
+  transition:transform .45s var(--ease-spring),opacity .35s var(--ease);
+}
+.toast.is-on{transform:translate(-50%,0);opacity:1}
+.fx-layer{position:fixed;inset:0;z-index:29;pointer-events:none;overflow:hidden}
+.fx{
+  position:absolute;
+  width:var(--s,18px);height:var(--s,18px);
+  color:var(--c,#b8531d);
+  opacity:0;
+  animation:fx-fly var(--d,1.5s) var(--ease) forwards;
+}
+.fx svg{width:100%;height:100%;display:block}
+
+/* ---------- 14. Кейфрейми ---------- */
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{
+  0%{opacity:0;transform:scale(0) rotate(var(--r,0deg))}
+  62%{opacity:1;transform:scale(1.1) rotate(var(--r,0deg))}
+  100%{opacity:1;transform:scale(1) rotate(var(--r,0deg))}
+}
+@keyframes breeze{
+  0%,100%{transform:rotate(-2.2deg)}
+  50%{transform:rotate(2.6deg)}
+}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+@keyframes rise-word{to{transform:translateY(0)}}
+@keyframes fade-in{to{opacity:1}}
+@keyframes glow-in{to{opacity:.85}}
+@keyframes glow-breathe{
+  0%,100%{opacity:.72;transform:translateZ(-46px) scale(1)}
+  50%{opacity:1;transform:translateZ(-46px) scale(1.07)}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes portrait-in{
+  0%{opacity:0;transform:translateZ(34px) scale(.35) rotate(-14deg)}
+  62%{opacity:1;transform:translateZ(34px) scale(1.07) rotate(3deg)}
+  100%{opacity:1;transform:translateZ(34px) scale(1) rotate(0)}
+}
+@keyframes ken-burns{
+  0%{transform:scale(1.06) translate(0,0)}
+  100%{transform:scale(1.15) translate(-1.5%,-2%)}
+}
+@keyframes sheen{
+  0%,72%{left:-120%}
+  100%{left:150%}
+}
+@keyframes leaf-tumble{
+  0%,100%{transform:rotate(-14deg) scale(1)}
+  50%{transform:rotate(16deg) scale(1.08)}
+}
+@keyframes spark-in{
+  0%{opacity:0;transform:translateZ(48px) scale(0)}
+  60%{opacity:1;transform:translateZ(48px) scale(1.5)}
+  100%{opacity:.95;transform:translateZ(48px) scale(1)}
+}
+@keyframes twinkle{
+  0%,100%{opacity:.95;transform:translateZ(48px) scale(1)}
+  50%{opacity:.35;transform:translateZ(48px) scale(.65)}
+}
+@keyframes heartbeat{
+  0%,100%{transform:scale(.94)}
+  18%{transform:scale(1.18)}
+  36%{transform:scale(.98)}
+}
+@keyframes cover-in{
+  0%{opacity:0;transform:translateY(34px) rotateX(12deg) scale(.94)}
+  100%{opacity:1;transform:translateY(0) rotateX(0) scale(1)}
+}
+@keyframes seal-in{
+  0%{opacity:0;transform:translateZ(24px) scale(.2) rotate(-40deg)}
+  70%{opacity:1;transform:translateZ(24px) scale(1.12) rotate(6deg)}
+  100%{opacity:1;transform:translateZ(24px) scale(1) rotate(0)}
+}
+@keyframes seal-pulse{
+  0%,100%{box-shadow:0 2px 0 rgba(255,255,255,.28) inset,0 -3px 8px rgba(0,0,0,.28) inset,0 14px 26px -14px var(--shade-3),0 0 0 0 var(--glow)}
+  50%{box-shadow:0 2px 0 rgba(255,255,255,.28) inset,0 -3px 8px rgba(0,0,0,.28) inset,0 14px 26px -14px var(--shade-3),0 0 0 14px transparent}
+}
+@keyframes halo{
+  0%{opacity:.85;transform:scale(1)}
+  70%{opacity:0;transform:scale(1.22)}
+  100%{opacity:0;transform:scale(1.22)}
+}
+@keyframes btn-shine{
+  0%{background-position:130% 0}
+  100%{background-position:-40% 0}
+}
+@keyframes beam{
+  0%{opacity:.5;transform:translate3d(0,0,0) scale(1)}
+  100%{opacity:.9;transform:translate3d(-3vw,3vh,0) scale(1.08)}
+}
+@keyframes fx-fly{
+  0%{opacity:0;transform:translate(0,0) scale(.4) rotate(0)}
+  12%{opacity:1}
+  100%{opacity:0;transform:translate(var(--dx,0),var(--dy,-220px)) scale(1.1) rotate(var(--dr,180deg))}
+}
+
+/* ---------- 15. Адаптив ---------- */
+@media (max-width:960px){
+  .spread{grid-template-columns:1fr}
+  .spine{display:none}
+  .panel--left{
+    align-items:center;
+    text-align:center;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel--left .panel-note{max-width:38ch}
+  .panel--left .mark{justify-content:center}
+  .panel--right{padding-left:clamp(24px,3.4vw,46px)}
+  .portrait{width:min(64vw,220px)}
+  .facts{margin-top:6px}
+  .reader{min-height:auto}
+  .chapter{position:relative;inset:auto}
+  .chapter:not(.is-active){display:none}
+}
+@media (max-width:560px){
+  .stage{padding:10px}
+  .panel{padding:22px 18px}
+  .panel--right{padding-left:18px}
+  .branch--tl,.branch--bl{display:none}
+  .branch--br{width:60vw;opacity:.5}
+  .controls{gap:9px}
+  .btn__face{padding:11px 17px;font-size:11.5px;letter-spacing:.08em}
+  .btn--lg .btn__face{padding:13px 24px}
+  .progress__label{display:none}
+  .cover__card{padding:30px 20px}
+  .utility{top:8px;right:8px}
+}
+
+/* ---------- 16. Менше руху ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.12s !important;
+  }
+  .twig{stroke-dashoffset:0 !important}
+  .portrait__frame,.portrait__ring,.portrait__dashed,.portrait__glow,.portrait__spark{opacity:1 !important}
+  .chapter__body p,.quote,.sign{opacity:1 !important;transform:none !important}
+  .chapter h2 .w > span{transform:none !important}
+}
